@@ -2,6 +2,7 @@ class Task < ApplicationRecord
   belongs_to :user
   belongs_to :board
   has_many :activities, class_name: "TaskActivity", dependent: :destroy
+  has_many :subtasks, dependent: :destroy
 
   enum :priority, { none: 0, low: 1, medium: 2, high: 3 }, default: :none, prefix: true
   enum :status, { inbox: 0, up_next: 1, in_progress: 2, in_review: 3, done: 4 }, default: :inbox
@@ -151,7 +152,7 @@ class Task < ApplicationRecord
       stream,
       action: :replace,
       target: "column-#{cached_status}-count",
-      html: %(<span id="column-#{cached_status}-count" class="ml-auto text-xs text-content-secondary bg-bg-elevated px-1.5 py-0.5 rounded">#{count}</span>)
+      html: %(<span id="column-#{cached_status}-count" style="font-size:11px;font-weight:600;color:#444;background:rgba(255,255,255,0.04);padding:0 7px;border-radius:5px;line-height:20px">#{count}</span>)
     )
   end
 
@@ -160,7 +161,7 @@ class Task < ApplicationRecord
     broadcast_to_board(
       action: :replace,
       target: "column-#{column_status}-count",
-      html: %(<span id="column-#{column_status}-count" class="ml-auto text-xs text-content-secondary bg-bg-elevated px-1.5 py-0.5 rounded">#{count}</span>)
+      html: %(<span id="column-#{column_status}-count" style="font-size:11px;font-weight:600;color:#444;background:rgba(255,255,255,0.04);padding:0 7px;border-radius:5px;line-height:20px">#{count}</span>)
     )
   end
 

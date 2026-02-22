@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_15_134003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -51,6 +51,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.bigint "user_id", null: false
     t.index ["token"], name: "index_api_tokens_on_token", unique: true
     t.index ["user_id"], name: "index_api_tokens_on_user_id"
+  end
+
+  create_table "api_usage_records", force: :cascade do |t|
+    t.integer "call_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.integer "month", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "month"], name: "index_api_usage_records_on_user_id_and_month", unique: true
+    t.index ["user_id"], name: "index_api_usage_records_on_user_id"
   end
 
   create_table "boards", force: :cascade do |t|
@@ -97,6 +107,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.index ["channel"], name: "index_solid_cable_messages_on_channel"
     t.index ["channel_hash"], name: "index_solid_cable_messages_on_channel_hash"
     t.index ["created_at"], name: "index_solid_cable_messages_on_created_at"
+  end
+
+  create_table "subtasks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "done", default: false
+    t.integer "position"
+    t.bigint "task_id", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task_id"], name: "index_subtasks_on_task_id"
   end
 
   create_table "tags", force: :cascade do |t|
@@ -155,6 +175,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
 
   create_table "tasks", force: :cascade do |t|
     t.datetime "agent_claimed_at"
+    t.text "agent_hint"
     t.datetime "assigned_at"
     t.boolean "assigned_to_agent", default: false, null: false
     t.boolean "blocked", default: false, null: false
@@ -196,21 +217,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_31_142501) do
     t.string "agent_name"
     t.string "avatar_url"
     t.datetime "created_at", null: false
+    t.datetime "current_period_ends_at"
     t.string "email_address", null: false
     t.string "password_digest"
+    t.string "plan", default: "free", null: false
+    t.string "polar_customer_id"
+    t.string "polar_subscription_id"
     t.string "provider"
+    t.string "subscription_status"
+    t.datetime "trial_ends_at"
     t.string "uid"
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["plan"], name: "index_users_on_plan"
+    t.index ["polar_customer_id"], name: "index_users_on_polar_customer_id"
+    t.index ["polar_subscription_id"], name: "index_users_on_polar_subscription_id"
     t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true, where: "(provider IS NOT NULL)"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "api_tokens", "users"
+  add_foreign_key "api_usage_records", "users"
   add_foreign_key "boards", "users"
   add_foreign_key "projects", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "subtasks", "tasks"
   add_foreign_key "tags", "projects"
   add_foreign_key "tags", "users"
   add_foreign_key "task_activities", "tasks"
